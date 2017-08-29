@@ -24,6 +24,8 @@ var loopTimeMax;
 
 module.exports = {
 
+//1238: Zwolle
+
 	init: function (options) {
 		_options					= options;
 		
@@ -32,7 +34,7 @@ module.exports = {
 		openiodUrl			= siteProtocol + 'openiod.org/' + _options.systemCode; //SCAPE604';
 		loopTimeMax			= 60000; //ms, 60000=60 sec
 
-		luftdatenUrl 			= 'http://api.luftdaten.info/v1/sensor/4696/'; 
+		luftdatenUrl 			= 'http://api.luftdaten.info/v1/sensor/'; 
 		luftdatenFileName 		= 'luftdaten.txt';
 
 		luftdatenLocalPathRoot = options.systemFolderParent + '/luftdaten/';
@@ -42,12 +44,29 @@ module.exports = {
 		// create subfolders
 		try {fs.mkdirSync(tmpFolder );} catch (e) {};//console.log('ERROR: no tmp folder found, batch run aborted.'); return } ;
 
-//		// 1 uur reeksen met Smart Emission metingen. Aanvulling elk uur.
-	
-		this.reqFile (luftdatenUrl, luftdatenFileName,	false, 'luftdatendata');
+		console.dir(_options);
+		
+		if (options.argvStations == undefined) {
+			console.log('Parameter with sensorId(s) is missing, processing aborted.');
+			return;
+		}
+		this.processSensors (); 
 
 		console.log('All retrieve actions are activated.');
 
+	},
+	
+	processSensors: function (sensorId) {
+		var sensorIds = _options.argvStations.split(',');
+		console.log(sensorIds);
+		
+		for (var i=0;i<sensorIds.length;i++) {
+			console.log('Processing sensorId: ' + sensorIds[i]);
+	
+			this.reqFile (luftdatenUrl + sensorIds[i] + '/', luftdatenFileName,	false, 'luftdatendata');
+
+		}
+	
 	},
 
 	reqFile: function (url, fileName, unzip, desc) {
@@ -150,7 +169,7 @@ module.exports = {
 	};
 	
 	
-	var milliKelvinToCelsius = function(n){return Math.round((n/1e3-273.15)*100)/100};
+//	var milliKelvinToCelsius = function(n){return Math.round((n/1e3-273.15)*100)/100};
 	
 
 	var options = {
@@ -162,6 +181,11 @@ module.exports = {
 		if (!error && response.statusCode == 200) {
 			//console.log(body.observations[0])
 			var inRecord	= JSON.parse(body);
+			
+			if (inRecord.length  == 0) {
+				console.log('No Luftdaten sensordata found for this url: ' + options.uri );
+				return;
+			}
 			
 //			console.dir(inRecord[0]);
 //			console.dir(inRecord[1]);
