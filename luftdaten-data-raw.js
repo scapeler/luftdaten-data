@@ -210,15 +210,15 @@ module.exports = {
 //			for (var i=0; i <inRecord.length;i++) {
 				var inMeasurement = inRecord[i];
 				var measurementTime = new Date(inMeasurement.timestamp+'.000Z');
-				console.log(inMeasurement.timestamp);
-				console.log(measurementTime);
+//				console.log(inMeasurement.timestamp);
+//				console.log(measurementTime);
 				var nowTime = new Date();
-				console.log(nowTime);
+//				console.log(nowTime);
 				var timeDiff = new Date().getTime() - measurementTime.getTime();
-				console.log(timeDiff);
+//				console.log(timeDiff);
 				
 				if (timeDiff >= 60000) {
-					console.log('ignore message timediff > 60 seconds');
+					console.log('ID: '+ inMeasurement.sensor.id + ' '+ nowTime + ' measurementtime: ' + measurementTime + ' ignore message timediff > 60 seconds' );
 					return; // ignore measurement older then 1.5 minute. retrieve per minute but delay getting message (maybe?)
 				}	
 				
