@@ -253,7 +253,7 @@ module.exports = {
 				'apri-sensor-luftdaten-PM10:'+ _measurement.pm10;
 //				'apri-sensor-luftdaten-temperature:'+ milliKelvinToCelsius(inRecord.s_temperatureambient) + ',' +
 				
-//			sendData(data);
+			sendData(data);
 
 			
 		}
