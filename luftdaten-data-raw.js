@@ -205,8 +205,24 @@ module.exports = {
 			var tmpMeasurements = {};
 			
 			var i = inRecord.length - 1;  // only last retrieved measurement
+			
+			
 //			for (var i=0; i <inRecord.length;i++) {
 				var inMeasurement = inRecord[i];
+				var measurementTime = new Date(inMeasurement.timestamp+'.000Z');
+				console.log(inMeasurement.timestamp);
+				console.log(measurementTime);
+				var nowTime = new Date();
+				console.log(nowTime);
+				var timeDiff = new Date().getTime() - measurementTime.getTime();
+				console.log(timeDiff);
+				
+				if (timeDiff >= 60000) {
+					console.log('ignore message timediff > 60 seconds');
+					return; // ignore measurement older then 1.5 minute. retrieve per minute but delay getting message (maybe?)
+				}	
+				
+
 				if (tmpMeasurements[inMeasurement.sensor.id] == undefined)  tmpMeasurements[inMeasurement.sensor.id]={};
 				var _measurement = tmpMeasurements[inMeasurement.sensor.id];
 				_measurement.sensorType = inMeasurement.sensor.sensor_type;
@@ -237,7 +253,7 @@ module.exports = {
 				'apri-sensor-luftdaten-PM10:'+ _measurement.pm10;
 //				'apri-sensor-luftdaten-temperature:'+ milliKelvinToCelsius(inRecord.s_temperatureambient) + ',' +
 				
-			sendData(data);
+//			sendData(data);
 
 			
 		}
