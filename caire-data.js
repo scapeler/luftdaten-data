@@ -46,12 +46,14 @@ module.exports = {
 		options.configParameter.databaseServer + '/' +
 		options.systemCode + '_' + options.configParameter.databaseName;
 		
+/*
 		_self.client = new pg.Client(sqlConnString);
 		_self.client.connect(function(err) {
 			if(err) {
 				return console.error('could not connect to postgres', err);
 			}
 		});
+*/
 //		_self.client.end();
 
 		
@@ -368,11 +370,11 @@ module.exports = {
 			
 			var tmpMeasurements = {};
 			
-			var i = inRecord.length - 1;  // only one retrieved measurement
+			var i = inRecords.length - 1;  // only one retrieved measurement
 			
 			
 //			for (var i=0; i <inRecord.length;i++) {
-				var inMeasurement = inRecord[i];
+				var inMeasurement = inRecords[i];
 				var measurementTime = new Date(inMeasurement.Date); //+'.000Z');
 				inMeasurement.sensorId = 'Caire_Groenlo';
 				inMeasurement.locationId = 'Groenlo';
@@ -416,11 +418,11 @@ module.exports = {
 			 
 			data.categories			= [];
 			data.observation		= 
-				'apri-sensor-caire-PM1:'+ _measurement.PM1 + ',' +
-				'apri-sensor-caire-PM25:'+ _measurement.PM25 + ',' +
-				'apri-sensor-caire-PM10:'+ _measurement.PM10 + ',' +
-				'apri-sensor-caire-rHum:'+ _measurement.RH + ',' +
-				'apri-sensor-caire-temperature:'+ _measurement.T;
+				'apri-sensor-caire-PM1:'+ inMeasurement.PM1 + ',' +
+				'apri-sensor-caire-PM25:'+ inMeasurement.PM25 + ',' +
+				'apri-sensor-caire-PM10:'+ inMeasurement.PM10 + ',' +
+				'apri-sensor-caire-rHum:'+ inMeasurement.RH + ',' +
+				'apri-sensor-caire-temperature:'+ inMeasurement.T;
 				
 			sendData(data);
 
