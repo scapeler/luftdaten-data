@@ -26,8 +26,7 @@ var fileNames, fileNamesIndex;
 var _self;
 
 var sqlFile = '';
-var restartIndex= 0; //  
-var restartSensorId='4847';  // restart after this id is found
+var restartIndex= 0; //3842; //3840 ; //3687; //3681;3682; //3675;//sensorid 5329  //3391;      errors for sensor id 5331
 
 
 // **********************************************************************************
@@ -61,11 +60,11 @@ module.exports = {
 		openiodUrl			= siteProtocol + 'openiod.org/' + _options.systemCode; //SCAPE604';
 		loopTimeMax			= 60000; //ms, 60000=60 sec
 
-		luftdatenUrl 			= 'http://archive.luftdaten.info/'; 
+		luftdatenUrl 			= 'http://api.luftdaten.info/static/v1/data/data.json.'; 
 		luftdatenFileName 		= 'luftdaten.txt';
 
 		luftdatenLocalPathRoot = options.systemFolderParent + '/luftdaten/';
-		fileFolder 			= 'archive';
+		fileFolder 			= 'archive-5min';
 		tmpFolder 			= luftdatenLocalPathRoot + fileFolder + "/" + 'tmp/';
 
 		// create subfolders
@@ -74,8 +73,7 @@ module.exports = {
 		console.dir(_options);
 		
 		if (options.argvStations == undefined) {
-			console.log('Parameter with archivedate is missing, processing aborted.');
-			return;
+			console.log('Parameter with archivedate is missing, processing with default (actual-2h) date.');
 		}
 		
 		this.processArchiveDate();
@@ -88,76 +86,44 @@ module.exports = {
 	
 	processArchiveDate: function () {
 		var archiveDate = _options.argvStations;  // one at a time or undefined for yesterday?
+		
+		if (_options.argvStations != undefined) {
+			archiveDate = _options.argvStations; // eg '2017-02-15-14-35'
+		} else {
+			var _date 		= new Date(new Date().getTime() - 7200000) ; //7.200.000 2 uur eerder
+			var _year		= _date.getFullYear();
+			var _month		= _date.getMonth()+1;
+			var _day		= _date.getDate();
+			var _hour		= _date.getHours();
+			var _minutes	= _date.getMinutes();	
+			var _yearStr	= ''+_year;
+			var _monthStr	= ''+_month;
+			var _dayStr		= ''+_day;
+			var _hourStr	= ''+_hour;
+			var _minutesStr	= '' + (_minutes - _minutes%5);
+			
+			_monthStr = _monthStr.length == 1 ? '0' + _monthStr : '' + _monthStr;
+			_dayStr = _dayStr.length == 1 ? '0' + _dayStr : '' + _dayStr;
+			_hourStr = _hourStr.length == 1 ? '0' + _hourStr : '' + _hourStr;
+			_minutesStr = _minutesStr.length == 1 ? '0' + _minutesStr : '' + _minutesStr;
+					
+			
+			archiveDate = _year + '-' + _monthStr + '-'+ _dayStr + '-' + _hourStr + '-' + _minutesStr; // 2017-02-15-14-35		
+
+		};	
+			
+
 		console.log(archiveDate);
 		
 		console.log('Processing archive date: ' + archiveDate);
 			
-		// date: yyyy-mm-dd
-		this.reqFolder (luftdatenUrl, archiveDate)	;
-
-	},
-	
-	reqFolder: function (url, archiveDate) {
-	
-		var _wfsResult=null;
-		var _url = url+archiveDate+'/';
-		console.log("Request start: Luftdaten archive (" + url + archiveDate + "/)");
-		var options = {
-			uri: _url,
-			method: 'GET'
-		};
+		// date: yyyy-mm-dd-hh-mm  mm=5 minutes cycle: 0,5,10,15, etc.
+		this.reqFile (luftdatenUrl, archiveDate)	;
 		
-		var _archiveDate = archiveDate;
-		_self = this;
-		fileNames = [];
-
-		request(options, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				//console.log(body.observations[0])
-				var inRecords	= body.split('<a href="20');
-			
-				if (inRecords.length  == 0) {
-					console.log('No Luftdaten archive data found for this url: ' + options.uri );
-					return;
-				}
-
-				for (var i=1; i <inRecords.length;i++) { //skip prefix data (html)
-					var _fileName = '20'+inRecords[i].split('">20')[0];
-					console.log(_fileName);
-					var fileMeta = {};
-					fileMeta.name = _fileName;
-					fileMeta.url = _url;
-					fileNames.push(fileMeta);
-				}
-				fileNamesIndex = 0; //start with first filename entry
-				_self.processOneFile(); 
-			}
-		});
-	},	
-	
-	processOneFile: function () {
-		if (fileNamesIndex <restartIndex) {
-			fileNamesIndex = restartIndex;
-		} 
-		if (fileNamesIndex>=fileNames.length) {
-			console.log('Number of files processed: '+fileNamesIndex-1);
-			return;
-		};	
-		if (fileNames[fileNamesIndex].name.includes('sds011') ) {
-			//if(restartSensorId != '' && fileNames[fileNamesIndex].name.includes(restartSensorId)) {
-			//	restartSensorId = '';
-			//	fileNamesIndex += 1;
-			//	_self.processOneFile();
-			//} else {
-			_self.reqFile();
-			// }
-		} else {
-			fileNamesIndex += 1;
-			_self.processOneFile();
-		}
 	},
+	
 
-	executeSql: function  (query, callback) {
+	executeSql: function  (query) {
 		console.log('sql start: ');
 		
 //		client.connect(function(err) {
@@ -170,15 +136,14 @@ module.exports = {
 				}
 				console.log('sql result is ok ');// + result);
 //				_self.client.end();
-				callback();
 			});
 //		});
     },
 
 	
-	reqFile: function () {
+	reqFile: function (url,archiveDate) {
 		
-		var url = fileNames[fileNamesIndex].url + fileNames[fileNamesIndex].name;
+		var _url = url + archiveDate ;
 	
 		var _wfsResult=null;
 //		console.log("Request start: " + fileNames[fileNamesIndex].name + " (" + url + ")");
@@ -284,180 +249,80 @@ module.exports = {
 	
 
 	var options = {
-		uri: url,
+		uri: _url,
 		method: 'GET'
 	};
 
 	request(options, function (error, response, body) {
-		//increase index for next file to process 
-		fileNamesIndex +=1;
-		console.log('Processing file '+ fileNames.length + '/'+ fileNamesIndex );
+		console.log('Processing file '+ _url );
 
 		if (error) {
 			console.log(error);
 		};
-		//console.log(response.statusCode);
+		console.log(response.statusCode);
 		if (!error && response.statusCode == 200) {
 			//console.log(body.observations[0])
-			var inRecords	= body.split('\n');
-			
+			var inRecords	= JSON.parse(body);
+						
 			if (inRecords.length  == 0) {
-				console.log('No Luftdaten archive data found for this url: ' + options.uri );
-				_self.processOneFile();
+				console.log('No Luftdaten 5 minute data found for this url: ' + options.uri );
 				return;
 			}
-			//console.log(inRecords[1]);
 			
+//			console.log(inRecords[0]);
 			
-//-- sensor_id;sensor_type;location;lat;lon;timestamp;P1;durP1;ratioP1;P2;durP2;ratioP2
-//-- 5281;SDS011;2664;50.946;6.652;2017-08-30T00:02:19;17.63;;;11.20;;
-//-- 5281;SDS011;2664;50.946;6.652;2017-08-30T00:04:45;11.50;;;9.67;;
-//-- 5281;SDS011;2664;50.946;6.652;2017-08-30T00:07:13;14.90;;;11.37;;  			
 			sqlFile = '';
 			var sqlRecord="";
-			for (var i=1;i<inRecords.length;i++) {
-				var fault_code = null;
-				var table_name = '';
-				var fault_code_attribute = '';
-				var fault_code_attribute_value = '';
-				var inColumn = inRecords[i].split(';');
-				if (inColumn[1] == undefined) continue; // end of file ?!
-				if (inColumn.length == 0) continue;
+			for (var i=0;i<inRecords.length;i++) {
+				var inRecord = inRecords[i];
+				if (inRecord.sensor.sensor_type.name != 'SDS011') continue; // end of file ?!
 				
-				if (inColumn[1]!='SDS011') {
-					console.log('record does not contain correct sensorId ' +inColumn[1]+ ' '+ inRecords[i]);
-					break;
-				}
-				
-	//			if (inColumn[0]<='4620') {
-	//				break;			
-	//			}
-				
-				if (inColumn[3] == '' || // missing lat/lon
-				    inColumn[4] == ''  
-					) { 
-					fault_code = 'missing latlon';
-					inColumn[3] = '0';
-					inColumn[4] = '0';
-				}
-				if (inColumn[6] == '' || // invalid P1 value
-				    inColumn[9] == ''  // invalid P2 value
-					) { 
-					fault_code = 'missing';
-					inColumn[6] = '0';
-					inColumn[9] = '0';
-				} else {
-				
-				if (inColumn[6] == "nan" || // invalid P1 value
-				    inColumn[9] == "nan"  // invalid P2 value
-					) { 
-					fault_code = "nan";
-					inColumn[6] = '0';
-					inColumn[9] = '0';
-				} else {
-					if (parseFloat(inColumn[6]) >=600 || // invalid P1 value
-				   		parseFloat(inColumn[9]) >=600 || // invalid P2 value
-						parseFloat(inColumn[6]) <=0  ||
-						parseFloat(inColumn[9]) <=0
-						) { 
-						fault_code = 'minmax';
-					}	
-				}
-				}
-				if (inColumn[0]=='5557') {
-					fault_code = 'problem';	//den haag, te hoge waarden en onregelmatig waardoor knipperlicht			
-				}
-				
-				var _measurementDate = new Date(inColumn[5]);
+				var _measurementDate = new Date(inRecord.timestamp);
 				var _minutes = _measurementDate.getMinutes() - (_measurementDate.getMinutes() % 5);
-				var _sqlDate = inColumn[5].substr(0,14);
+				var _sqlDate = inRecord.timestamp.substr(0,14);
 				if (_minutes < 10) _sqlDate += '0';
 				_sqlDate += _minutes+':00';
+
+				for (var j=0;j<inRecord.sensordatavalues.length;j++) {
+					var _sensorType='';
+					if (inRecord.sensordatavalues[j].value_type == 'P1') {
+						_sensorType = '_PM10';
+					}
+					if (inRecord.sensordatavalues[j].value_type == 'P2') {
+						_sensorType = '_PM25';
+					}
+					if (_sensorType == '') continue;
+								
+					var sqlRecord = "\nINSERT INTO as_measurement (sensor_id, measurement_date,measurement_date_5m,sensor_type,sensor_value,location_id,sensor_lat,sensor_lon,creation_date, geom) " +
+					" VALUES (\n" +
+					"'" + inRecord.sensor.id + "'," +
+					"'" + inRecord.timestamp + "'," +
+					"'" + _sqlDate + "'," +	
+					"'" + inRecord.sensor.sensor_type.name + _sensorType  + "'," +
+					inRecord.sensordatavalues[j].value +  "," +
+					"'"+inRecord.location.id + "'," +
+					inRecord.location.latitude + "," +
+					inRecord.location.longitude + "," +
+					"current_timestamp," +
+					"ST_SetSRID(ST_MakePoint(" + inRecord.location.longitude + ", " + inRecord.location.latitude + "), 4326) );";
+
+					sqlFile=sqlFile.concat(sqlRecord);
+				}
 				
-				if (fault_code != null) {
-					table_name = 'as_measurement_fault';
-					fault_code_attribute = ' fault_code, ';
-					fault_code_attribute_value = " '" + fault_code + "', " ;
-				} else {
-					table_name = 'as_measurement';
-					fault_code_attribute = ' ' ;
-					fault_code_attribute_value = ' ';
-				}				
-																
-				var sqlRecord = "\nINSERT INTO " + table_name + " (sensor_id, measurement_date,measurement_date_5m,sensor_type,sensor_value,location_id,sensor_lat,sensor_lon,creation_date,"+fault_code_attribute+" geom) " +
-				" VALUES (\n" +
-				"'" + inColumn[0] + "'," +
-				"'"+inColumn[5] + "'," +
-				"'" + _sqlDate + "'," +	
-				"'"+inColumn[1] + "_PM10'," +
-				inColumn[6] +  "," +
-				"'"+inColumn[2] + "'," +
-				inColumn[3] + "," +
-				inColumn[4] + "," +
-				"current_timestamp," +
-				fault_code_attribute_value +
-				"ST_SetSRID(ST_MakePoint(" + inColumn[4] + ", " + inColumn[3] + "), 4326) );" +
-				"\nINSERT INTO " + table_name + " (sensor_id, measurement_date,measurement_date_5m,sensor_type,sensor_value,location_id,sensor_lat,sensor_lon,creation_date,"+fault_code_attribute+" geom) " +
-				" VALUES (\n" +
-				"'" + inColumn[0] + "'," +
-				"'"+inColumn[5] + "'," +
-				"'" + _sqlDate + "'," +	
-				"'"+inColumn[1] + "_PM25'," +
-				inColumn[9] +  "," +
-				"'"+inColumn[2] + "'," +
-				inColumn[3] +  "," +
-				inColumn[4] +  "," +
-				"current_timestamp," +
-				fault_code_attribute_value +
-				"ST_SetSRID(ST_MakePoint(" + inColumn[4] + ", " + inColumn[3] + "), 4326) );"				
-				;
-				
-				//if (fault_code != null) {
-				//	console.log(sqlRecord);
-				//}
-				sqlFile=sqlFile.concat(sqlRecord);
-				
-				if (i==1 ) console.log(sqlRecord);
+				if (i<7) {
+					console.log(inRecord);
+					console.log(sqlRecord);
+				}	
 			}
 			
 			sqlFile=sqlFile.concat('\ncommit;\n');
 
-			_self.executeSql(sqlFile, _self.processOneFile);
+	//		_self.executeSql(sqlFile);
 
 			
-			//_self.processOneFile();
 			return;
 			
 //			console.dir(inRecord[0]);
-//			console.dir(inRecord[1]);
-/*
-			var outFile	= '"foi";"sensor";"latlng";"measureDate";"measureValue";"measureUom"\n'; 
-			
-
-			for (var i=0;i<body.observations.length;i++) {
-				console.log(i);
-				var inRec			= body.observations[i];
-				var outRec			= {};
-				outRec.foi			= inRec.procedure; // eg. 'station-35'
-				outRec.sensor		= inRec.observableProperty; // eg. 'coraw'
-				outRec.latlng		= inRec.featureOfInterest.geometry.coordinates;
-				outRec.measureDate	= inRec.resultTime;
-				outRec.measureValue	= inRec.result.value;
-				outRec.measureUom	= inRec.result.uom;	
-				
-				var csvRec			= '';
-				csvRec				+= '"' + outRec.foi + '";';
-				csvRec				+= '"' + outRec.sensor + '";';
-				csvRec				+= outRec.latlng + ';';
-				csvRec				+= '"' + outRec.measureDate + '";';
-				csvRec				+= outRec.measureValue + ';';
-				csvRec				+= '"' + outRec.measureUom + '"';
-				
-				outFile				+= csvRec + "\n";
-				
-			}
-			writeFile(tmpFolder, fileName, outFile);
-*/
 			
 			var data				= {};
 			data.neighborhoodCode	= 'BU07721111';//'BU04390603'; //geoLocation.neighborhoodCode;  	
@@ -522,7 +387,6 @@ module.exports = {
 
 			
 		}
-		_self.processOneFile();
 	});
 	
 /*
