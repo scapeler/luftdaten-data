@@ -78,7 +78,7 @@ module.exports = {
 		openiodUrl			= siteProtocol + 'openiod.org/' + _options.systemCode; //SCAPE604';
 		loopTimeMax			= 60000; //ms, 60000=60 sec
 
-		apriSensorUrl 			= 'http://nulwoning.mooo.com:6001/data/json?1'; 
+//		apriSensorUrl 			= 'http://nulwoning.mooo.com:6001/data/json?1'; 
 		apriSensorFileName 		= 'ApriSensor.txt';
 		
 
@@ -215,7 +215,8 @@ https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=tran
 		var param = {};
 		param.sensorsystem			= 'scapeler_dylos'; //'apri-sensor-dylos'; 
 		param.offering				= 'offering_0439_initial'; 
-		param.foi					= 'scapeler_dylos_SCRP000000004123e145'; //,scapeler_dylos_SCRP00000000b7e92a99_DC1100'; //'scapeler_dylos_SCRP00000000b7e92a99_DC1100'; //'apri-sensor-dylos_SCRP000000004123e145'; 
+//		param.foi					= 'scapeler_dylos_SCRP000000004123e145'; //,scapeler_dylos_SCRP00000000b7e92a99_DC1100'; //'scapeler_dylos_SCRP00000000b7e92a99_DC1100'; //'apri-sensor-dylos_SCRP000000004123e145'; 
+		param.foi					= _options.argvStations; //'scapeler_dylos_SCRP00000000b7e92a99_DC1100'; 
 		param.observation			= 'scapeler_dylos_raw0,scapeler_dylos_raw1'; //'apri-sensor-dylos-pm25'; 
 		param.startDateTimeFilter	= startDateTimeFilter;
 		param.endDateTimeFilter		= endDateTimeFilter;
@@ -489,7 +490,7 @@ https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=tran
 		fois.push(foi);
 
 		var foi		={};
-		foi.id		= 'SCRP00000000b7e92a99_DC1100';
+		foi.id		= 'SCRP00000000b7e92a99*DC1100';
 		foi.lat		= 51.459162;
 		foi.lon		= 3.902342;
 		foi.observableProperties	= [];
@@ -506,6 +507,26 @@ https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=tran
 		observableProperty.sensorType	= 'Dylos';
 		foi.observableProperties.push(observableProperty);
 		fois.push(foi);
+
+		var foi		={};
+		foi.id		= 'SCRP00000000ac35e5d3*DC1700';
+		foi.lat		= 51.459162;
+		foi.lon		= 3.902342;
+		foi.observableProperties	= [];
+		var observableProperty		= {};
+		observableProperty.id	= 'raw0';
+		observableProperty.uom	= 'p/0.01 cb.ft.';
+		observableProperty.externalName	= 'PM2.5';		
+		observableProperty.sensorType	= 'Dylos';
+		foi.observableProperties.push(observableProperty);
+		var observableProperty		= {};
+		observableProperty.id	= 'raw1';
+		observableProperty.uom	= 'p/0.01 cb.ft.';
+		observableProperty.externalName	= 'PM10';		
+		observableProperty.sensorType	= 'Dylos';
+		foi.observableProperties.push(observableProperty);
+		fois.push(foi);
+
 
 
 
@@ -594,7 +615,7 @@ https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=tran
 //				where host = ${Influx.escape.stringLit(os.hostname())}
 //				order by time desc
 			
-			influx.query('select * from m_ApriSensor order by time desc limit 10')
+			influx.query('select * from m_ApriSensor order by time desc limit 3')
 			.then(result => {
 				console.log(result);
 				//res.json(result)
