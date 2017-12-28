@@ -3,7 +3,8 @@
 Extract data from Luftdaten archive.
 add 1 day from archive into table as_measurement
 
-  node index luftdaten-data-archive 2017-10-20
+  cd projects/SCAPE604/luftdaten-data
+  node index luftdaten-data-archive 2017-12-23
 
 Create for every new sensor or sensor location a foi record with no duplicates for new dates/not changed foi data.
 
@@ -17,6 +18,7 @@ Calculate grid cell values per 5 minut cycle. Repeat next sql's for every hour o
 next step:
 
 - gridcell Luftdaten Stuttgart.sql
+- gridcell Luftdaten Sofia.sql
 - gridcell Luftdaten Euro.sql
 
 

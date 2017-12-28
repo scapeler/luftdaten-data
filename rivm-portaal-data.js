@@ -553,8 +553,8 @@ https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=tran
 		for (var i=0;i<_data.length;i++) {
 			var observation = _data[i];
 			var validData = false; 
+			lat = undefined;
 			for (var f=0; f<fois.length;f++){
-				lat = undefined;
 				if (observation.featureOfInterest == fois[f].id) {
 					console.log(observation.observableProperty);
 					for (var op=0;op<fois[f].observableProperties.length;op++) {
