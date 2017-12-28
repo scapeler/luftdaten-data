@@ -588,7 +588,7 @@ https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=tran
 			measurement.fields.timestamp_from 		= fromDateTime;
 			measurement.fields.timestamp_to 		= toDateTime;
 			measurement.fields[externalName]					= observation.resultValues[0][1];;  // value / ug/m3
-			measurement.fields[externalName+"-eenheid"] 		= sensorEenheid; // ??
+			//measurement.fields[externalName+"-eenheid"] 		= sensorEenheid; // ??
 			measurement.fields[externalName+"-meetopstelling"]	= sensorType;  // Dylos DC1700
 /*
 			measurement.fields.T 					= temperatureValue;  //temperature
