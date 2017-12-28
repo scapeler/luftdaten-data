@@ -541,6 +541,9 @@ https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=tran
 //		var pm10Value, pm10Eenheid, sensorTypePm10;
 		var sensorValue, sensorEenheid, sensorType;
 		
+		var dylos	= {};  // special for dylos to calculate PM10 PM2.5 ug/m3
+		
+		
 		var measurement = {};
 		measurement.measurement		= 'm_ApriSensor';
 		measurement.tags 			= []; 
@@ -587,7 +590,10 @@ https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=tran
 			measurement.fields.lon 					= lon;
 			measurement.fields.timestamp_from 		= fromDateTime;
 			measurement.fields.timestamp_to 		= toDateTime;
-			measurement.fields[externalName]					= observation.resultValues[0][1];;  // value / ug/m3
+			if (sensorType == 'Dylos') {
+				dylos[externalName] = observation.resultValues[0][1];		
+			}
+			measurement.fields[externalName]					= observation.resultValues[0][1];  // value / ug/m3
 			//measurement.fields[externalName+"-eenheid"] 		= sensorEenheid; // ??
 			measurement.fields[externalName+"-meetopstelling"]	= sensorType;  // Dylos DC1700
 /*
@@ -600,6 +606,13 @@ https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=tran
 */
 
 		}  // end of for loop observations in _data
+
+			if (dylos['PM2.5'] != undefined && dylos['PM10'] != undefined) {
+				dylos.pm25UgM3	= (dylos['PM2.5'] - dylos['PM10'] ) / 250;
+				dylos.pm10UgM3	= dylos.pm25UgM3 * 1.43;
+				dylos.pm25UgM3	= Math.round(dylos.pm25UgM3*100)/100;
+				dylos.pm10UgM3	= Math.round(dylos.pm10UgM3*100)/100;
+			}
 
 			console.dir(measurement);
 			console.dir(influx);
