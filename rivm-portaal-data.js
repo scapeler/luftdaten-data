@@ -613,6 +613,8 @@ https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=tran
 				dylos.pm25UgM3	= Math.round(dylos.pm25UgM3*100)/100;
 				dylos.pm10UgM3	= Math.round(dylos.pm10UgM3*100)/100;
 				console.log(dylos['PM2.5'] + '->' + dylos.pm25UgM3 + ' & ' + dylos['PM10'] + '->' + dylos.pm10UgM3 );
+				measurement.fields['PM2.5'] = dylos.pm25UgM3;
+				measurement.fields['PM10'] = dylos.pm10UgM3;
 			}
 
 			console.dir(measurement);
