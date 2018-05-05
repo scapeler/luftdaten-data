@@ -241,9 +241,9 @@ module.exports = {
 				var timeDiff = new Date().getTime() - measurementTime.getTime();
 //				console.log(timeDiff);
 
-				if (timeDiff >= 90000) {  //1.5 minute. 0.5 minuut speling
+				if (timeDiff <= 60000 || timeDiff > 120000 ) {  // must be in the minute one minute ago
 					console.log('ID: '+ inMeasurement.sensor.id + ' '+ nowTime + ' measurementtime: ' + measurementTime + ' ignore message timediff > 60 seconds' );
-					return; // ignore measurement older then 1.5 minute. retrieve per minute but delay getting message (maybe?)
+					return; // ignore measurement
 				}
 
 
