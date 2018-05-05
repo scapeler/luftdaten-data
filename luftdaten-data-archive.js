@@ -26,8 +26,8 @@ var fileNames, fileNamesIndex;
 var _self;
 
 var sqlFile = '';
-var restartIndex= 0; //  
-var restartSensorId='4847';  // restart after this id is found
+var restartIndex= 0; //7117; //
+var restartSensorId=''; //'5873'; //'4847';  // restart after this id is found
 
 
 // **********************************************************************************
@@ -40,13 +40,13 @@ module.exports = {
 	init: function (options) {
 		_options					= options;
 		_self = this;
-		
-		sqlConnString = options.configParameter.databaseType + '://' + 
-		options.configParameter.databaseAccount + ':' + 
-		options.configParameter.databasePassword + '@' + 
+
+		sqlConnString = options.configParameter.databaseType + '://' +
+		options.configParameter.databaseAccount + ':' +
+		options.configParameter.databasePassword + '@' +
 		options.configParameter.databaseServer + '/' +
 		options.systemCode + '_' + options.configParameter.databaseName;
-		
+
 		_self.client = new pg.Client(sqlConnString);
 		_self.client.connect(function(err) {
 			if(err) {
@@ -55,13 +55,13 @@ module.exports = {
 		});
 //		_self.client.end();
 
-		
+
 		secureSite 			= true;
 		siteProtocol 		= secureSite?'https://':'http://';
 		openiodUrl			= siteProtocol + 'openiod.org/' + _options.systemCode; //SCAPE604';
 		loopTimeMax			= 60000; //ms, 60000=60 sec
 
-		luftdatenUrl 			= 'http://archive.luftdaten.info/'; 
+		luftdatenUrl 			= 'http://archive.luftdaten.info/';
 		luftdatenFileName 		= 'luftdaten.txt';
 
 		luftdatenLocalPathRoot = options.systemFolderParent + '/luftdaten/';
@@ -72,33 +72,33 @@ module.exports = {
 		try {fs.mkdirSync(tmpFolder );} catch (e) {};//console.log('ERROR: no tmp folder found, batch run aborted.'); return } ;
 
 		console.dir(_options);
-		
+
 		if (options.argvStations == undefined) {
 			console.log('Parameter with archivedate is missing, processing aborted.');
 			return;
 		}
-		
+
 		this.processArchiveDate();
-		
-//		this.processSensors (); 
+
+//		this.processSensors ();
 
 		console.log('All retrieve actions are activated.');
 
 	},
-	
+
 	processArchiveDate: function () {
 		var archiveDate = _options.argvStations;  // one at a time or undefined for yesterday?
 		console.log(archiveDate);
-		
+
 		console.log('Processing archive date: ' + archiveDate);
-			
+
 		// date: yyyy-mm-dd
 		this.reqFolder (luftdatenUrl, archiveDate)	;
 
 	},
-	
+
 	reqFolder: function (url, archiveDate) {
-	
+
 		var _wfsResult=null;
 		var _url = url+archiveDate+'/';
 		console.log("Request start: Luftdaten archive (" + url + archiveDate + "/)");
@@ -106,7 +106,7 @@ module.exports = {
 			uri: _url,
 			method: 'GET'
 		};
-		
+
 		var _archiveDate = archiveDate;
 		_self = this;
 		fileNames = [];
@@ -115,7 +115,7 @@ module.exports = {
 			if (!error && response.statusCode == 200) {
 				//console.log(body.observations[0])
 				var inRecords	= body.split('<a href="20');
-			
+
 				if (inRecords.length  == 0) {
 					console.log('No Luftdaten archive data found for this url: ' + options.uri );
 					return;
@@ -130,19 +130,19 @@ module.exports = {
 					fileNames.push(fileMeta);
 				}
 				fileNamesIndex = 0; //start with first filename entry
-				_self.processOneFile(); 
+				_self.processOneFile();
 			}
 		});
-	},	
-	
+	},
+
 	processOneFile: function () {
 		if (fileNamesIndex <restartIndex) {
 			fileNamesIndex = restartIndex;
-		} 
+		}
 		if (fileNamesIndex>=fileNames.length) {
 			console.log('Number of files processed: '+fileNamesIndex-1);
 			return;
-		};	
+		};
 		if (fileNames[fileNamesIndex].name.includes('sds011') ) {
 			//if(restartSensorId != '' && fileNames[fileNamesIndex].name.includes(restartSensorId)) {
 			//	restartSensorId = '';
@@ -159,7 +159,7 @@ module.exports = {
 
 	executeSql: function  (query, callback) {
 		console.log('sql start: ');
-		
+
 //		client.connect(function(err) {
 //			if(err) {
 //				return console.error('could not connect to postgres', err);
@@ -175,11 +175,11 @@ module.exports = {
 //		});
     },
 
-	
+
 	reqFile: function () {
-		
+
 		var url = fileNames[fileNamesIndex].url + fileNames[fileNamesIndex].name;
-	
+
 		var _wfsResult=null;
 //		console.log("Request start: " + fileNames[fileNamesIndex].name + " (" + url + ")");
 
@@ -232,8 +232,8 @@ module.exports = {
     		if( onend ) {
       			onend()
     		}
-  		})        
- 
+  		})
+
   		req.streambuffer = self
 	}
 */
@@ -250,9 +250,9 @@ module.exports = {
 					exec(" cd " + tmpFolder + " ;  unzip -o " + tmpFolder + fileName + " ", puts);
 				}
     		}
-  		}); 
+  		});
 	}
-	
+
 	// send data to SOS service via OpenIoD REST service
 	var sendData = function(data) {
 	// oud //		http://openiod.com/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&inputformat=insertom&objectid=humansensor&format=xml
@@ -263,7 +263,7 @@ module.exports = {
 
 		var _url = openiodUrl + '/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=insertom&sensorsystem=apri-sensor-luftdaten&offering=offering_0439_initial&commit=true';
 		_url = _url + '&region=0439' + '&neighborhoodcode=' + data.neighborhoodCode + '&citycode=' + data.cityCode + '&foi=' + data.foi + '&observation=' + data.observation ;
-		
+
 		console.log(_url);
 
 		request.get(_url)
@@ -276,12 +276,12 @@ module.exports = {
 			})
 		;
 
-		
+
 	};
-	
-	
+
+
 //	var milliKelvinToCelsius = function(n){return Math.round((n/1e3-273.15)*100)/100};
-	
+
 
 	var options = {
 		uri: url,
@@ -289,7 +289,7 @@ module.exports = {
 	};
 
 	request(options, function (error, response, body) {
-		//increase index for next file to process 
+		//increase index for next file to process
 		fileNamesIndex +=1;
 		console.log('Processing file '+ fileNames.length + '/'+ fileNamesIndex );
 
@@ -300,19 +300,19 @@ module.exports = {
 		if (!error && response.statusCode == 200) {
 			//console.log(body.observations[0])
 			var inRecords	= body.split('\n');
-			
+
 			if (inRecords.length  == 0) {
 				console.log('No Luftdaten archive data found for this url: ' + options.uri );
 				_self.processOneFile();
 				return;
 			}
 			//console.log(inRecords[1]);
-			
-			
+
+
 //-- sensor_id;sensor_type;location;lat;lon;timestamp;P1;durP1;ratioP1;P2;durP2;ratioP2
 //-- 5281;SDS011;2664;50.946;6.652;2017-08-30T00:02:19;17.63;;;11.20;;
 //-- 5281;SDS011;2664;50.946;6.652;2017-08-30T00:04:45;11.50;;;9.67;;
-//-- 5281;SDS011;2664;50.946;6.652;2017-08-30T00:07:13;14.90;;;11.37;;  			
+//-- 5281;SDS011;2664;50.946;6.652;2017-08-30T00:07:13;14.90;;;11.37;;
 			sqlFile = '';
 			var sqlRecord="";
 			for (var i=1;i<inRecords.length;i++) {
@@ -323,34 +323,34 @@ module.exports = {
 				var inColumn = inRecords[i].split(';');
 				if (inColumn[1] == undefined) continue; // end of file ?!
 				if (inColumn.length == 0) continue;
-				
+
 				if (inColumn[1]!='SDS011') {
 					console.log('record does not contain correct sensorId ' +inColumn[1]+ ' '+ inRecords[i]);
 					break;
 				}
-				
+
 	//			if (inColumn[0]<='4620') {
-	//				break;			
+	//				break;
 	//			}
-				
+
 				if (inColumn[3] == '' || // missing lat/lon
-				    inColumn[4] == ''  
-					) { 
+				    inColumn[4] == ''
+					) {
 					fault_code = 'missing latlon';
 					inColumn[3] = '0';
 					inColumn[4] = '0';
 				}
 				if (inColumn[6] == '' || // invalid P1 value
 				    inColumn[9] == ''  // invalid P2 value
-					) { 
+					) {
 					fault_code = 'missing';
 					inColumn[6] = '0';
 					inColumn[9] = '0';
 				} else {
-				
+
 				if (inColumn[6] == "nan" || // invalid P1 value
 				    inColumn[9] == "nan"  // invalid P2 value
-					) { 
+					) {
 					fault_code = "nan";
 					inColumn[6] = '0';
 					inColumn[9] = '0';
@@ -359,21 +359,21 @@ module.exports = {
 				   		parseFloat(inColumn[9]) >=600 || // invalid P2 value
 						parseFloat(inColumn[6]) <=0  ||
 						parseFloat(inColumn[9]) <=0
-						) { 
+						) {
 						fault_code = 'minmax';
-					}	
+					}
 				}
 				}
 				if (inColumn[0]=='5557') {
-					fault_code = 'problem';	//den haag, te hoge waarden en onregelmatig waardoor knipperlicht			
+					fault_code = 'problem';	//den haag, te hoge waarden en onregelmatig waardoor knipperlicht
 				}
-				
+
 				var _measurementDate = new Date(inColumn[5]);
 				var _minutes = _measurementDate.getMinutes() - (_measurementDate.getMinutes() % 5);
 				var _sqlDate = inColumn[5].substr(0,14);
 				if (_minutes < 10) _sqlDate += '0';
 				_sqlDate += _minutes+':00';
-				
+
 				if (fault_code != null) {
 					table_name = 'as_measurement_fault';
 					fault_code_attribute = ' fault_code, ';
@@ -382,13 +382,13 @@ module.exports = {
 					table_name = 'as_measurement';
 					fault_code_attribute = ' ' ;
 					fault_code_attribute_value = ' ';
-				}				
-																
+				}
+
 				var sqlRecord = "\nINSERT INTO " + table_name + " (sensor_id, measurement_date,measurement_date_5m,sensor_type,sensor_value,location_id,sensor_lat,sensor_lon,creation_date,"+fault_code_attribute+" geom) " +
 				" VALUES (\n" +
 				"'" + inColumn[0] + "'," +
 				"'"+inColumn[5] + "'," +
-				"'" + _sqlDate + "'," +	
+				"'" + _sqlDate + "'," +
 				"'"+inColumn[1] + "_PM10'," +
 				inColumn[6] +  "," +
 				"'"+inColumn[2] + "'," +
@@ -401,7 +401,7 @@ module.exports = {
 				" VALUES (\n" +
 				"'" + inColumn[0] + "'," +
 				"'"+inColumn[5] + "'," +
-				"'" + _sqlDate + "'," +	
+				"'" + _sqlDate + "'," +
 				"'"+inColumn[1] + "_PM25'," +
 				inColumn[9] +  "," +
 				"'"+inColumn[2] + "'," +
@@ -409,30 +409,30 @@ module.exports = {
 				inColumn[4] +  "," +
 				"current_timestamp," +
 				fault_code_attribute_value +
-				"ST_SetSRID(ST_MakePoint(" + inColumn[4] + ", " + inColumn[3] + "), 4326) );"				
+				"ST_SetSRID(ST_MakePoint(" + inColumn[4] + ", " + inColumn[3] + "), 4326) );"
 				;
-				
+
 				//if (fault_code != null) {
 				//	console.log(sqlRecord);
 				//}
 				sqlFile=sqlFile.concat(sqlRecord);
-				
+
 				if (i==1 ) console.log(sqlRecord);
 			}
-			
+
 			sqlFile=sqlFile.concat('\ncommit;\n');
 
 			_self.executeSql(sqlFile, _self.processOneFile);
 
-			
+
 			//_self.processOneFile();
 			return;
-			
+
 //			console.dir(inRecord[0]);
 //			console.dir(inRecord[1]);
 /*
-			var outFile	= '"foi";"sensor";"latlng";"measureDate";"measureValue";"measureUom"\n'; 
-			
+			var outFile	= '"foi";"sensor";"latlng";"measureDate";"measureValue";"measureUom"\n';
+
 
 			for (var i=0;i<body.observations.length;i++) {
 				console.log(i);
@@ -443,8 +443,8 @@ module.exports = {
 				outRec.latlng		= inRec.featureOfInterest.geometry.coordinates;
 				outRec.measureDate	= inRec.resultTime;
 				outRec.measureValue	= inRec.result.value;
-				outRec.measureUom	= inRec.result.uom;	
-				
+				outRec.measureUom	= inRec.result.uom;
+
 				var csvRec			= '';
 				csvRec				+= '"' + outRec.foi + '";';
 				csvRec				+= '"' + outRec.sensor + '";';
@@ -452,26 +452,26 @@ module.exports = {
 				csvRec				+= '"' + outRec.measureDate + '";';
 				csvRec				+= outRec.measureValue + ';';
 				csvRec				+= '"' + outRec.measureUom + '"';
-				
+
 				outFile				+= csvRec + "\n";
-				
+
 			}
 			writeFile(tmpFolder, fileName, outFile);
 */
-			
+
 			var data				= {};
-			data.neighborhoodCode	= 'BU07721111';//'BU04390603'; //geoLocation.neighborhoodCode;  	
-			data.neighborhoodName	= '..'; //geoLocation.neighborhoodName;	
-			data.cityCode			= 'GM0772'; //geoLocation.cityCode;	
+			data.neighborhoodCode	= 'BU07721111';//'BU04390603'; //geoLocation.neighborhoodCode;
+			data.neighborhoodName	= '..'; //geoLocation.neighborhoodName;
+			data.cityCode			= 'GM0772'; //geoLocation.cityCode;
 			data.cityName			= '..'; //geoLocation.cityName;
-			
+
 			//observation=stress:01
-			
+
 			var tmpMeasurements = {};
-			
+
 			var i = inRecord.length - 1;  // only last retrieved measurement
-			
-			
+
+
 //			for (var i=0; i <inRecord.length;i++) {
 				var inMeasurement = inRecord[i];
 				var measurementTime = new Date(inMeasurement.timestamp+'.000Z');
@@ -481,21 +481,21 @@ module.exports = {
 //				console.log(nowTime);
 				var timeDiff = new Date().getTime() - measurementTime.getTime();
 //				console.log(timeDiff);
-				
+
 				if (timeDiff >= 60000) {
 					console.log('ID: '+ inMeasurement.sensor.id + ' '+ nowTime + ' measurementtime: ' + measurementTime + ' ignore message timediff > 60 seconds' );
 					return; // ignore measurement older then 1.5 minute. retrieve per minute but delay getting message (maybe?)
-				}	
-				
+				}
+
 
 				if (tmpMeasurements[inMeasurement.sensor.id] == undefined)  tmpMeasurements[inMeasurement.sensor.id]={};
 				var _measurement = tmpMeasurements[inMeasurement.sensor.id];
 				_measurement.sensorType = inMeasurement.sensor.sensor_type;
 				_measurement.data = inMeasurement.sensordatavalues;
-				
+
 				data.foi = 'LUFTDATEN'+inMeasurement.location.country+inMeasurement.sensor.id;
-				
-//				console.dir(_measurement);	
+
+//				console.dir(_measurement);
 				if (_measurement.sensorType.id == 14) {  //name='SDS011'
 				  	for (var j=0; j< _measurement.data.length;j++) {
 						if (_measurement.data[j].value_type == 'P1' ) {
@@ -503,35 +503,35 @@ module.exports = {
 						}
 						if (_measurement.data[j].value_type == 'P2' ) {
 					  		_measurement.pm25 = _measurement.data[j].value;
-						} 
- 
+						}
+
 					}
-					
+
 				}
 //			}
 //		    console.log(_measurement.pm25);
 //		    console.log(_measurement.pm10);
-			 
+
 			data.categories			= [];
-			data.observation		= 
+			data.observation		=
 				'apri-sensor-luftdaten-PM25:'+ _measurement.pm25 + ',' +
 				'apri-sensor-luftdaten-PM10:'+ _measurement.pm10;
 //				'apri-sensor-luftdaten-temperature:'+ milliKelvinToCelsius(inRecord.s_temperatureambient) + ',' +
-				
+
 //			sendData(data);
 
-			
+
 		}
 		_self.processOneFile();
 	});
-	
+
 /*
   	new StreamBuffer(request( options, function(error, response) {
 		console.log("Request completed: " + desc + " " );
 		var currDate = new Date();
 		var iso8601 = currDate.toISOString();
 
-		writeFile(tmpFolder, fileName, '{"retrievedDate": "' + iso8601 + '", "content":' + 
+		writeFile(tmpFolder, fileName, '{"retrievedDate": "' + iso8601 + '", "content":' +
 			_wfsResult + ' }');
 		})
   	);
