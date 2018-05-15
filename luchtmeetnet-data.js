@@ -251,7 +251,7 @@ module.exports = {
 				if (tmpMeasurements[sensorId] == undefined)  tmpMeasurements[sensorId]={};
 				var _measurement = tmpMeasurements[sensorId];
 			//	_measurement.sensorType = inMeasurement.formula;
-			  console.dir(inMeasurement);
+			//  console.dir(inMeasurement);
 				if (inMeasurement.formula=='PM25') {
 				  _measurement.PM25 = inMeasurement.value;
 				}
