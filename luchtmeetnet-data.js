@@ -155,7 +155,7 @@ module.exports = {
 
 		console.log(_url);
 
-/*
+
 		request.get(_url)
 			.on('response', function(response) {
 				console.log(response.statusCode) // 200
@@ -165,7 +165,7 @@ module.exports = {
 				console.log(err)
 			})
 		;
-*/
+
 
 	};
 
