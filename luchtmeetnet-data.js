@@ -253,10 +253,49 @@ module.exports = {
 			//	_measurement.sensorType = inMeasurement.formula;
 			  console.dir(inMeasurement);
 				if (inMeasurement.formula=='PM25') {
-				  _measurement.pm25 = inMeasurement.value;
+				  _measurement.PM25 = inMeasurement.value;
 				}
 				if (inMeasurement.formula=='PM10') {
-				  _measurement.pm10 = inMeasurement.value;
+				  _measurement.PM10 = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='NO') {
+				  _measurement.NO = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='NO2') {
+				  _measurement.NO2 = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='SO2') {
+				  _measurement.SO2 = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='O3') {
+				  _measurement.O3 = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='C6H6') {
+				  _measurement.C6H6 = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='C7H8') {
+				  _measurement.C7H8 = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='C8H10') {
+				  _measurement.C8H10 = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='CO') {
+				  _measurement.CO = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='H2S') {
+				  _measurement.H2S = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='PS') {
+				  _measurement.PS = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='NH3') {
+				  _measurement.NH3 = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='FN') {
+				  _measurement.FN = inMeasurement.value;
+				}
+				if (inMeasurement.formula=='Offset') {
+				  _measurement.Offset = inMeasurement.value;
 				}
 
 		  }
@@ -267,10 +306,67 @@ module.exports = {
 //		    console.log(_measurement.pm10);
 
 			data.categories			= [];
-			data.observation		=
-				'apri-sensor-luchtmeetnet-PM25:'+ _measurement.pm25 + ',' +
-				'apri-sensor-luchtmeetnet-PM10:'+ _measurement.pm10;
-//				'apri-sensor-luchtmeetnet-temperature:'+ milliKelvinToCelsius(inRecord.s_temperatureambient) + ',' +
+			data.observation		= "";
+      if (_measurement.PM25) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-PM25:'+ _measurement.PM25;
+			}
+			if (_measurement.PM10) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-PM10:'+_measurement.PM10;
+			}
+			if (_measurement.NO) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-NO:'+_measurement.NO;
+			}
+			if (_measurement.NO2) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-NO2:'+_measurement.NO2;
+			}
+			if (_measurement.SO2) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-SO2:'+_measurement.SO2;
+			}
+			if (_measurement.O3) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-O3:'+_measurement.O3;
+			}
+			if (_measurement.C6H6) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-C6H6:'+_measurement.C6H6;
+			}
+			if (_measurement.C7H8) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-C7H8:'+_measurement.C7H8;
+			}
+			if (_measurement.C8H10) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-C8H10:'+_measurement.C8H10;
+			}
+			if (_measurement.CO) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-CO:'+_measurement.CO;
+			}
+			if (_measurement.H2S) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-H2S:'+_measurement.H2S;
+			}
+			if (_measurement.PS) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-PS:'+_measurement.PS;
+			}
+			if (_measurement.NH3) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-NH3:'+_measurement.NH3;
+			}
+			if (_measurement.FN) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-FN:'+_measurement.FN;
+			}
+			if (_measurement.Offset) {
+				if(data.observation != "") data.observation		= data.observation + ",";
+				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-Offset:'+_measurement.Offset;
+			}
 
 			sendData(data);
 
