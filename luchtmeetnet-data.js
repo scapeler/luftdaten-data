@@ -44,7 +44,7 @@ module.exports = {
 		// create subfolders
 		try {fs.mkdirSync(tmpFolder );} catch (e) {};//console.log('ERROR: no tmp folder found, batch run aborted.'); return } ;
 
-		console.dir(_options);
+		//console.dir(_options);
 
 		if (options.argvStations == undefined) {
 			console.log('Parameter with sensorId(s) is missing, processing aborted.');
