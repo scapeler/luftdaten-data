@@ -151,11 +151,11 @@ module.exports = {
 	//https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=insertom&sensorsystem=scapeler_shinyei&offering=offering_0439_initial&verbose=true&commit=true&observation=scapeler_shinyei:12.345&neighborhoodcode=BU04390402
 
 		var _url = openiodUrl + '/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=insertom&sensorsystem=apri-sensor-luchtmeetnet&offering=offering_0439_initial&commit=true';
-		_url = _url + '&foi=' + data.foi + '&observation=' + data.observation ;
+		_url = _url + '&foi=' + data.foi + '&observation=' + data.observation + '&measurementTime=' + data.measurementTime.toISOString() ;
 
 		console.log(_url);
 
-
+/*
 		request.get(_url)
 			.on('response', function(response) {
 				console.log(response.statusCode) // 200
@@ -165,7 +165,7 @@ module.exports = {
 				console.log(err)
 			})
 		;
-
+*/
 
 	};
 
@@ -247,7 +247,7 @@ module.exports = {
 					continue; // ignore measurement
 				}
 
-
+				data.measurementTime = new Date(inMeasurement.timestamp_measured);
 				if (tmpMeasurements[sensorId] == undefined)  tmpMeasurements[sensorId]={};
 				var _measurement = tmpMeasurements[sensorId];
 			//	_measurement.sensorType = inMeasurement.formula;
@@ -367,8 +367,9 @@ module.exports = {
 				if(data.observation != "") data.observation		= data.observation + ",";
 				data.observation		= data.observation + 'apri-sensor-luchtmeetnet-Offset:'+_measurement.Offset;
 			}
-
-			sendData(data);
+      if(data.observation != "") {
+				sendData(data);
+			}
 
 
 		}
