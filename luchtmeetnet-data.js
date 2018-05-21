@@ -242,8 +242,8 @@ module.exports = {
 				var timeDiff = new Date().getTime() - measurementTime.getTime();
 				//console.log(timeDiff);
 
-				if (timeDiff > 3600000 ) {  // only last hour measurements
-					//console.log('ID: '+ sensorId + ' '+ nowTime + ' measurementtime: ' + measurementTime + ' ignore message timediff > 1 hour' );
+				if (timeDiff > 2*3600000 ) {  // only last hour measurements + kwartier
+					console.log('ID: '+ sensorId + ' '+ nowTime + ' measurementtime: ' + measurementTime + ' ignore message timediff > 1 hour' );
 					continue; // ignore measurement
 				}
 
