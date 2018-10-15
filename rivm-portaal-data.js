@@ -16,7 +16,7 @@
 
 	var request = require('request');
 	var fs 		= require('fs');
-	var sys 	= require('sys');
+	var sys 	= require('util');
 	var Influx = require('influx');
 
 	//var pg = require('pg');

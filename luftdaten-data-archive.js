@@ -10,7 +10,7 @@
 
 var request = require('request');
 var fs 		= require('fs');
-var sys 	= require('sys');
+var sys 	= require('util');
 var pg = require('pg');
 
 var sqlConnString;
