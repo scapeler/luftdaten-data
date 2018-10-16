@@ -180,7 +180,13 @@ module.exports = {
 	request(options, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			//console.log(body.observations[0])
-			var inRecord	= JSON.parse(body);
+			var inRecord ={};
+			try {
+				inRecord	= JSON.parse(body);
+			} catch (e) {
+				console.log('No Json data in luftdaten response:\n' + body );
+				return;
+			};
 
 			if (inRecord.length  == 0) {
 				console.log('No Luftdaten sensordata found for this url: ' + options.uri );
