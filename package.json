@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/openiod/luftdaten-data/issues"
   },
-  "homepage": "https://github.com/openiod/luftdaten-data#readme"
+  "homepage": "https://github.com/openiod/luftdaten-data#readme",
+  "dependencies": {
+    "request": "^2.88.0"
+  }
 }
