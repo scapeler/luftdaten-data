@@ -45,7 +45,7 @@ module.exports = {
 		sensorIds = _options.argvStations.split(',');
 
 		luftdatenLocalPathRoot = options.systemFolderParent + '/luftdaten/';
-		fileFolder 			= 'luftdaten';
+		fileFolder 			= 'data-json';
 		tmpFolder 			= luftdatenLocalPathRoot + fileFolder + "/" + 'tmp/';
 
 		// create subfolders
