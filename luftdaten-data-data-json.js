@@ -12,7 +12,7 @@ var request = require('request');
 var fs 		= require('fs');
 var sys 	= require('util');
 var _options	= {};
-var luftdatenUrl, luftdatenFileName, luftdatenLocalPathRoot, fileFolder, tmpFolder;
+var luftdatenUrl, luftdatenFileName, luftdatenLocalPathRoot, fileFolder, tmpFolder,fileNameDate;
 var secureSite;
 var siteProtocol;
 var openiodUrl;
@@ -37,7 +37,11 @@ module.exports = {
 		loopTimeMax			= 60000; //ms, 60000=60 sec
 
 		luftdatenUrl 			= 'http://api.luftdaten.info/static/v1/data.json';
-		luftdatenFileName 		= 'luftdaten.txt';
+		luftdatenFileName = 'luftdaten';
+		var currDate 			= new Date();
+		fileNameDate 			= luftdatenFileName +'_'+ currDate.toISOString() + '.json';
+
+
 		sensorIds = _options.argvStations.split(',');
 
 		luftdatenLocalPathRoot = options.systemFolderParent + '/luftdaten/';
@@ -59,9 +63,9 @@ module.exports = {
 
 	},
 
-	processSensors: function (sensorId) {
+	processSensors: function () {
 		console.log(sensorIds);
-		this.reqFile (luftdatenUrl, luftdatenFileName,	false, 'luftdatendata');
+		this.reqFile (luftdatenUrl, fileNameDate,	false, 'luftdatendata');
 
 	},
 
@@ -281,7 +285,7 @@ module.exports = {
 			}
 			writeFile(tmpFolder, fileName, outFile);
 */
-
+			writeFile(tmpFolder, fileNameDate, body);
 
 			//observation=stress:01
 
