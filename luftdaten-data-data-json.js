@@ -328,7 +328,7 @@ module.exports = {
 
 			console.log('Number of records retrieved: '+inRecord.length);
 			var csvRecord = '';
-      csvFileOut = '';
+      csvFileOut = 'datetime;country;sensorId;foi;lat;lon;alt;pm25;pm10\n'; // csv header
 
 			for (var i=0;i<inRecord.length;i++) {
 
@@ -347,6 +347,7 @@ module.exports = {
 					}
 				}
 			}
+
       // write csvfile for pm values
 			writeFile(tmpFolder+"csv/pm/", fileNameDate+'.csv', csvFileOut);
 
