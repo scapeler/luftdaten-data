@@ -12,7 +12,8 @@ var request = require('request');
 var fs 		= require('fs');
 var sys 	= require('util');
 var _options	= {};
-var luftdatenUrl, luftdatenFileName, luftdatenLocalPathRoot, fileFolder, tmpFolder,fileNameDate;
+var luftdatenUrl, luftdatenFileName, luftdatenLocalPathRoot, fileFolder, tmpFolder,fileNameDate
+   , csvFileOut;
 var secureSite;
 var siteProtocol;
 var openiodUrl;
@@ -39,7 +40,7 @@ module.exports = {
 		luftdatenUrl 			= 'http://api.luftdaten.info/static/v1/data.json';
 		luftdatenFileName = 'luftdaten';
 		var currDate 			= new Date();
-		fileNameDate 			= luftdatenFileName +'_'+ currDate.toISOString() + '.json';
+		fileNameDate 			= luftdatenFileName +'_'+ currDate.toISOString();
 
 
 		sensorIds = _options.argvStations.split(',');
@@ -132,11 +133,11 @@ module.exports = {
     		if(err) {
       			console.log(err);
     		} else {
-      			console.log("The file is saved! " + tmpFolder + fileName + ' (unzip:' + unzip + ')');
+      			console.log("The file is saved! " + path + fileName + ' (unzip:' + unzip + ')');
 				if (unzip) {
 					var exec = require('child_process').exec;
 					var puts = function(error, stdout, stderr) { sys.puts(stdout) }
-					exec(" cd " + tmpFolder + " ;  unzip -o " + tmpFolder + fileName + " ", puts);
+					exec(" cd " + path + " ;  unzip -o " + path + fileName + " ", puts);
 				}
     		}
   		});
@@ -224,14 +225,50 @@ module.exports = {
 		//		    console.log(_measurement.pm25);
 		//		    console.log(_measurement.pm10);
 
-		data.observation		=
-			'apri-sensor-luftdaten-PM25:'+ inMeasurement.pm25 + ',' +
-			'apri-sensor-luftdaten-PM10:'+ inMeasurement.pm10;
-		//				'apri-sensor-luftdaten-temperature:'+ milliKelvinToCelsius(inRecord.s_temperatureambient) + ',' +
-//		console.log(data);
-		sendData(data);
+		if (inMeasurement.pm25 != undefined) {
+			data.observation		=
+				'apri-sensor-luftdaten-PM25:'+ inMeasurement.pm25 + ',' +
+				'apri-sensor-luftdaten-PM10:'+ inMeasurement.pm10;
+			//				'apri-sensor-luftdaten-temperature:'+ milliKelvinToCelsius(inRecord.s_temperatureambient) + ',' +
+			//		console.log(data);
+			sendData(data);
+		}
 	}
 
+	var createPmCsvRecordOut = function(inMeasurement) {
+		var record				= {};
+		if (inMeasurement.sensor.sensor_type.id == 14) {  //name='SDS011'
+		 	for (var j=0; j< inMeasurement.sensordatavalues.length;j++) {
+				if (inMeasurement.sensordatavalues[j].value_type == 'P1' ) {
+					record.pm10 = inMeasurement.sensordatavalues[j].value;
+				}
+				if (inMeasurement.sensordatavalues[j].value_type == 'P2' ) {
+					record.pm25 = inMeasurement.sensordatavalues[j].value;
+				}
+			}
+		}
+		if (record.pm25==undefined) return null; // no pmvalues SDS011
+
+		record.measurementTime 	= inMeasurement.timestamp.replace(/ /,'T')+'.000Z';
+		record.countryCode 			= inMeasurement.location.country;
+		record.latitude 				= inMeasurement.location.latitude;
+		record.longitude 				= inMeasurement.location.longitude;
+		record.altitude 				= inMeasurement.location.altitude;
+		record.sensorId					= inMeasurement.sensor.id;
+		record.foi 							= 'LUFTDATEN'+inMeasurement.location.country+inMeasurement.sensor.id;
+
+		var recordOut = ''+
+			'"' + record.measurementTime + '";' +
+			'"' + record.countryCode + '";' +
+			'"' + record.sensorId + '";' +
+			'"' + record.foi + '";' +
+      '' 	+ record.latitude + ';' +
+      '' 	+ record.longitude + ';' +
+      '' 	+ record.altitude + ';' +
+			'' 	+ record.pm25 + ';' +
+			'' 	+ record.pm10 ;
+		return recordOut;
+	}
 
 
 	var options = {
@@ -285,22 +322,34 @@ module.exports = {
 			}
 			writeFile(tmpFolder, fileName, outFile);
 */
-			writeFile(tmpFolder, fileNameDate, body);
+			writeFile(tmpFolder+"json/", fileNameDate+'.json', body);
 
 			//observation=stress:01
 
 			console.log('Number of records retrieved: '+inRecord.length);
-
+			var csvRecord = '';
+      csvFileOut = '';
+      
 			for (var i=0;i<inRecord.length;i++) {
 				var inMeasurement = inRecord[i];
 
 				for (var j=0;j<sensorIds.length;j++) {
+
+          // create csv record for PM values
+          csvRecord = createPmCsvRecordOut(inMeasurement);
+          if (csvRecord != undefined) {
+            csvFileOut += csvRecord + '\n';
+          }
+
 					if (inMeasurement.sensor.id == sensorIds[j]) {
 						console.log('Processing sensorId: ' + sensorIds[j]);
 						createRecordOut(inMeasurement);
 					}
 				}
 			}
+      // write csvfile for pm values
+			writeFile(tmpFolder+"csv/pm/", fileNameDate+'.csv', csvFileOut);
+
 
 			return;
 
