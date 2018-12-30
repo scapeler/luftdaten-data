@@ -329,18 +329,18 @@ module.exports = {
 			console.log('Number of records retrieved: '+inRecord.length);
 			var csvRecord = '';
       csvFileOut = '';
-      
+
 			for (var i=0;i<inRecord.length;i++) {
+
 				var inMeasurement = inRecord[i];
 
+        // create csv record for PM values
+        csvRecord = createPmCsvRecordOut(inMeasurement);
+        if (csvRecord != undefined) {
+          csvFileOut += csvRecord + '\n';
+        }
+
 				for (var j=0;j<sensorIds.length;j++) {
-
-          // create csv record for PM values
-          csvRecord = createPmCsvRecordOut(inMeasurement);
-          if (csvRecord != undefined) {
-            csvFileOut += csvRecord + '\n';
-          }
-
 					if (inMeasurement.sensor.id == sensorIds[j]) {
 						console.log('Processing sensorId: ' + sensorIds[j]);
 						createRecordOut(inMeasurement);
