@@ -565,6 +565,24 @@
 			foi.observableProperties.push(observableProperty);
 			fois.push(foi);
 
+			var foi		={};
+			foi.id		= 'SCRP0000000098e6a65d';  // Aalten
+			foi.lat		= 51.928;
+			foi.lon		= 6.582;
+			foi.observableProperties	= [];
+			var observableProperty		= {};
+			observableProperty.id	= 'raw0';
+			observableProperty.uom	= 'p/0.01 cb.ft.';
+			observableProperty.externalName	= 'PM2.5';
+			observableProperty.sensorType	= 'Dylos';
+			foi.observableProperties.push(observableProperty);
+			var observableProperty		= {};
+			observableProperty.id	= 'raw1';
+			observableProperty.uom	= 'p/0.01 cb.ft.';
+			observableProperty.externalName	= 'PM10';
+			observableProperty.sensorType	= 'Dylos';
+			foi.observableProperties.push(observableProperty);
+			fois.push(foi);
 
 
 
