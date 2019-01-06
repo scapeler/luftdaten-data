@@ -19,6 +19,8 @@ var siteProtocol;
 var openiodUrl;
 var sensorIds;
 var loopTimeMax;
+var arrayOut;
+var arrayOutIndex;
 
 
 
@@ -53,6 +55,9 @@ module.exports = {
 		try {fs.mkdirSync(tmpFolder );} catch (e) {};//console.log('ERROR: no tmp folder found, batch run aborted.'); return } ;
 
 		//console.dir(_options);
+
+    arrayOut = [];
+    arrayOutIndex = 0;
 
 		if (options.argvStations == undefined) {
 			console.log('Parameter with sensorId(s) is missing, processing aborted.');
@@ -144,13 +149,13 @@ module.exports = {
 	}
 
 	// send data to SOS service via OpenIoD REST service
-	var sendData = function(data) {
+	var sendData = function() {
 	// oud //		http://openiod.com/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&inputformat=insertom&objectid=humansensor&format=xml
 	// oud //			&region=EHV		&lat=50.1		&lng=4.0		&category=airquality		&value=1
 
 	//http://localhost:4000/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=insertom&sensorsystem=scapeler_shinyei&offering=offering_0439_initial&verbose=true&commit=true&observation=scapeler_shinyei:12.345&neighborhoodcode=BU04390402
 	//https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=insertom&sensorsystem=scapeler_shinyei&offering=offering_0439_initial&verbose=true&commit=true&observation=scapeler_shinyei:12.345&neighborhoodcode=BU04390402
-
+    var data = arrayOut(arrayOutIndex);
 		var _url = openiodUrl + '/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=insertom&sensorsystem=apri-sensor-luftdaten&offering=offering_0439_initial&commit=true';
 		_url = _url +
 		// '&region=0439' +
@@ -165,14 +170,26 @@ module.exports = {
 			.on('response', function(response) {
 				console.log(response.statusCode) // 200
 				console.log(response.headers['content-type']) // 'image/png'
+        arrayOutIndex++;
+        processArrayOut();
   			})
 			.on('error', function(err) {
 				console.log(err)
+        arrayOutIndex++;
+        processArrayOut();
 			})
 		;
 
 
 	};
+
+  var processArrayOut=function(){
+    if (arrayOutIndex>=arrayOut.length ) {
+      console.log('End of processing arrayOut: ' + arrayOut.length + ' observations.' )
+      return
+    }
+    sendData();
+  };
 
 	var createRecordOut = function(inMeasurement) {
 		//	var milliKelvinToCelsius = function(n){return Math.round((n/1e3-273.15)*100)/100};
@@ -231,7 +248,7 @@ module.exports = {
 				'apri-sensor-luftdaten-PM10:'+ inMeasurement.pm10;
 			//				'apri-sensor-luftdaten-temperature:'+ milliKelvinToCelsius(inRecord.s_temperatureambient) + ',' +
 			//		console.log(data);
-			sendData(data);
+      arrayOut.push(data);
 		}
 	}
 
@@ -351,6 +368,7 @@ module.exports = {
       // write csvfile for pm values
 			writeFile(tmpFolder+"csv/pm/", fileNameDate+'.csv', csvFileOut);
 
+      processArrayOut(1);
 
 			return;
 
