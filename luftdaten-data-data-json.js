@@ -184,6 +184,7 @@ module.exports = {
 	};
 
   var processArrayOut=function(){
+    console.log('process arraout ' + arrayOutIndex);
     if (arrayOutIndex>=arrayOut.length ) {
       console.log('End of processing arrayOut: ' + arrayOut.length + ' observations.' )
       return
@@ -367,8 +368,8 @@ module.exports = {
 
       // write csvfile for pm values
 			writeFile(tmpFolder+"csv/pm/", fileNameDate+'.csv', csvFileOut);
-
-      processArrayOut(1);
+      arrayOutIndex=0;
+      processArrayOut();
 
 			return;
 
