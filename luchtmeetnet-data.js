@@ -299,6 +299,12 @@ module.exports = {
 				}
 
 		  }
+
+			if (_measurement == undefined) {
+				console.log('Geen geldige measurement gevonden voor '+sensorId);
+				return;
+			}
+
 			data.foi = 'LUCHTMEETNET'+sensorId;
 
 //			}
