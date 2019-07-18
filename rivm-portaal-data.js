@@ -724,6 +724,7 @@
 					measurement.fields['PM2.5'] = dylos.pm25UgM3;
 					measurement.fields[""+externalName] = dylos.pm10UgM3;
 					measurement.fields['PM'] = dylos.pm10UgM3;
+					measurement.fields['PM-meetopstelling']= 'Dylos'
 				}
 
 				console.dir(measurement);
