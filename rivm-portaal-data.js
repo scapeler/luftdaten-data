@@ -513,6 +513,7 @@
 
 			var foi		={};
 			foi.id		= 'SCRP00000000b7e92a99_DC1100';
+			foi.externalId	= 'SCRP00000000b7e92a99*DC1100'
 			foi.lat		= 51.459162;
 			foi.lon		= 3.902342;
 			foi.observableProperties	= [];
@@ -661,12 +662,14 @@
 						lat				= fois[f].lat;
 						lon				= fois[f].lon;
 						validData	= true;
+						if (fois[f].externalId !=undefined) {
+							id =fois[f].externalId
+						} else id	= observation.sensorId;
 						break;
 					}
 				}
 				if (validData==false) continue; // foi is not autorized to use the portal
 
-				id				= observation.sensorId;
 				fromDateTime 	= observation.dateObserved;
 				toDateTime 		= observation.dateObserved;
 //	//			sensorValue		=
