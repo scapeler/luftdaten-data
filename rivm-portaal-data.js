@@ -489,6 +489,11 @@
 		processData: function(data) {
 			console.log('the results are: ')
 			console.log(data);
+			var _data = JSON.parse(data);
+			if (_data.length==0) {
+				console.log('No data found for '+_options.argvStations)
+				return
+			}
 
 			var fois	= [];
 
