@@ -106,7 +106,8 @@
 						"PM2.5":Influx.FieldType.INTEGER,
 						"PM2.5-eenheid": Influx.FieldType.STRING,
 						"PM2.5-meetopstelling": Influx.FieldType.STRING,
-						"PM10":Influx.FieldType.INTEGER,
+						"PM10":Influx.FieldType.FLOAT,
+//						"PM10":Influx.FieldType.INTEGER,
 						"PM10-eenheid": Influx.FieldType.STRING,
 						"PM10-meetopstelling": Influx.FieldType.STRING
 					},
@@ -716,7 +717,7 @@
 					dylos.pm10UgM3	= Math.round(dylos.pm10UgM3*100)/100+0.5;
 					console.log(observation.scapeler_dylos_raw0 + '->' + dylos.pm25UgM3 + ' & ' + observation.scapeler_dylos_raw1 + '->' + dylos.pm10UgM3 );
 					measurement.fields['PM2.5'] = dylos.pm25UgM3;
-					measurement.fields[externalName] = dylos.pm10UgM3;
+					measurement.fields[""+externalName] = dylos.pm10UgM3;
 				}
 
 				console.dir(measurement);
