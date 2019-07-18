@@ -722,7 +722,7 @@
 				console.dir(measurement);
 				console.dir(influx);
 
-				if (1==2) {
+				if (1==1) {
 					influx.writePoints([
 						measurement
 					]).catch(err => {
