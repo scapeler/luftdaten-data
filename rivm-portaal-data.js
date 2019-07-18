@@ -712,15 +712,15 @@
 				if (observation.scapeler_dylos_raw0 != undefined && observation.scapeler_dylos_raw1 != undefined) {
 					dylos.pm25UgM3	= (observation.scapeler_dylos_raw0 - observation.scapeler_dylos_raw1 ) / 250;
 					dylos.pm10UgM3	= dylos.pm25UgM3 * 1.43;
-					dylos.pm25UgM3	= Math.round(dylos.pm25UgM3*100)/100;
-					dylos.pm10UgM3	= Math.round(dylos.pm10UgM3*100)/100;
+					dylos.pm25UgM3	= Math.round(dylos.pm25UgM3*100)/100+0.5;
+					dylos.pm10UgM3	= Math.round(dylos.pm10UgM3*100)/100+0.5;
 					console.log(observation.scapeler_dylos_raw0 + '->' + dylos.pm25UgM3 + ' & ' + observation.scapeler_dylos_raw1 + '->' + dylos.pm10UgM3 );
-					measurement.fields['PM2.5'] = dylos.pm25UgM3+0.5;
-					measurement.fields['PM10'] = dylos.pm10UgM3+0.5;
+					measurement.fields['PM2.5'] = dylos.pm25UgM3.toString();
+					measurement.fields["PM10"] = dylos.pm10UgM3.toString();
 				}
 
 				console.dir(measurement);
-				console.dir(influx);
+				//console.dir(influx);
 
 				if (1==1) {
 					influx.writePoints([
