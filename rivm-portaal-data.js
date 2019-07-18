@@ -738,7 +738,7 @@
 
 	//				where host = ${Influx.escape.stringLit(os.hostname())}
 	//				order by time desc
-
+				console.log('Toon laatste records in Influx database:')
 				influx.query('select * from m_ApriSensor order by time desc limit 3')
 				.then(result => {
 					console.log(result);
