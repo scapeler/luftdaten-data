@@ -111,6 +111,10 @@
 //						"PM10":Influx.FieldType.INTEGER,
 						"PM10-eenheid": Influx.FieldType.STRING,
 						"PM10-meetopstelling": Influx.FieldType.STRING
+						"PM":Influx.FieldType.INTEGER,
+//						"PM2.5":Influx.FieldType.INTEGER,
+						"PM-eenheid": Influx.FieldType.STRING,
+						"PM-meetopstelling": Influx.FieldType.STRING,
 					},
 					tags: [
 						'id'
