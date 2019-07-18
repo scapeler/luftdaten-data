@@ -27,7 +27,9 @@
 	var apriSensorUrl, apriSensorFileName, apriSensorLocalPathRoot, fileFolder, tmpFolder;
 	var secureSite;
 	var siteProtocol;
-	var openiodUrl;
+	var openIoDUrl;
+	var fiwareService;
+	var fiwareServicePath;
 	var loopTimeMax;
 
 	var influx;
@@ -75,7 +77,8 @@
 
 			secureSite 			= true;
 			siteProtocol 		= secureSite==true?'https://':'http://';
-			openiodUrl			= siteProtocol + 'openiod.org/' + _options.systemCode; //SCAPE604';
+			openIoDUrl			= siteProtocol + 'aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/';
+
 			loopTimeMax			= 60000; //ms, 60000=60 sec
 
 	//		apriSensorUrl 			= 'http://nulwoning.mooo.com:6001/data/json?1';
@@ -213,13 +216,20 @@
 
 
 			var param = {};
-			param.sensorsystem			= 'scapeler_dylos'; //'apri-sensor-dylos';
-			param.offering				= 'offering_0439_initial';
+			param.fiwareService = '';
+			param.fiwareServicePath = '';
+			param.key = 'sensorId';
+			param.opPerRow = 'true';
+
+			//param.sensorsystem			= 'scapeler_dylos'; //'apri-sensor-dylos';
+			//param.offering				= 'offering_0439_initial';
 	//		param.foi					= 'scapeler_dylos_SCRP000000004123e145'; //,scapeler_dylos_SCRP00000000b7e92a99_DC1100'; //'scapeler_dylos_SCRP00000000b7e92a99_DC1100'; //'apri-sensor-dylos_SCRP000000004123e145';
 			param.foi					= _options.argvStations; //'scapeler_dylos_SCRP00000000b7e92a99_DC1100';
-			param.observation			= 'scapeler_dylos_raw0,scapeler_dylos_raw1'; //'apri-sensor-dylos-pm25';
-			param.startDateTimeFilter	= startDateTimeFilter;
-			param.endDateTimeFilter		= endDateTimeFilter;
+			//param.observation			= 'scapeler_dylos_raw0,scapeler_dylos_raw1'; //'apri-sensor-dylos-pm25';
+			param.ops = 'scapeler_dylos_raw0,scapeler_dylos_raw1';
+			param.dateFrom	= startDateTimeFilter.toISOString();
+			param.dateTo		= endDateTimeFilter.toISOString();
+			param.format = 'json';
 
 			this.getOpenIoD(param, this.processData);
 
@@ -280,7 +290,7 @@
 		//http://localhost:4000/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=insertom&sensorsystem=scapeler_shinyei&offering=offering_0439_initial&verbose=true&commit=true&observation=scapeler_shinyei:12.345&neighborhoodcode=BU04390402
 		//https://openiod.org/SCAPE604/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=insertom&sensorsystem=scapeler_shinyei&offering=offering_0439_initial&verbose=true&commit=true&observation=scapeler_shinyei:12.345&neighborhoodcode=BU04390402
 
-			var _url = openiodUrl + '/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=insertom&sensorsystem=apri-sensor-caire&offering=offering_0439_initial&commit=true';
+			var _url = openIoDUrl + '/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=insertom&sensorsystem=apri-sensor-caire&offering=offering_0439_initial&commit=true';
 			_url = _url + '&region=0439' + '&neighborhoodcode=' + data.neighborhoodCode + '&citycode=' + data.cityCode + '&foi=' + data.foi + '&observation=' + data.observation ;
 
 			console.log(_url);
@@ -326,6 +336,8 @@
 				}
 
 	//			console.log(inRecords[0]);
+				console.log('test');
+				return;
 
 				sqlFile = '';
 				var sqlRecord="";
@@ -432,16 +444,25 @@
 
 		getOpenIoD: function(param, callback){
 
-			var _url = openiodUrl + '/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=getobservation&format=json';
+			//var _url = openiodUrl + '/openiod?SERVICE=WPS&REQUEST=Execute&identifier=transform_observation&action=getobservation&format=json';
+//console.dir(param)
+			var _url = openIoDUrl +
+				"?fiwareService=" +param.fiwareService+
+				"&fiwareServicePath=" +param.fiwareServicePath+
+				"&key="+param.key+
+				"&opPerRow="+param.opPerRow+
+				"&foiOps="+param.foi+","+param.ops+
+				'&dateFrom=' + param.dateFrom +
+				'&dateTo=' + param.dateTo+
+				'&format=' + param.format
+				;
 
-
-			_url = _url +
-				'&sensorsystem=' + param.sensorsystem +
-				'&offering=' + param.offering +
-				'&foi=' + param.foi +
-				'&op=' + param.observation +
-				'&date_start=' + param.startDateTimeFilter.toISOString() +
-				'&date_end=' + param.endDateTimeFilter.toISOString();
+//				'&sensorsystem=' + param.sensorsystem +
+//				'&offering=' + param.offering +
+//				'&foi=' + param.foi +
+//				'&op=' + param.observation +
+//				'&date_start=' + param.startDateTimeFilter.toISOString() +
+//				'&date_end=' + param.endDateTimeFilter.toISOString();
 
 			console.log(_url);
 
@@ -466,6 +487,7 @@
 		},
 
 		processData: function(data) {
+			console.log('the results are: ')
 			console.log(data);
 
 			var fois	= [];
@@ -476,13 +498,13 @@
 			foi.lon		= 4.957269;
 			foi.observableProperties	= [];
 			var observableProperty		= {};
-			observableProperty.id	= 'raw0';
+			observableProperty.id	= 'scapeler_dylos_raw0';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM2.5';
 			observableProperty.sensorType	= 'Dylos';
 			foi.observableProperties.push(observableProperty);
 			var observableProperty		= {};
-			observableProperty.id	= 'raw1';
+			observableProperty.id	= 'scapeler_dylos_raw1';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM10';
 			observableProperty.sensorType	= 'Dylos';
@@ -490,18 +512,18 @@
 			fois.push(foi);
 
 			var foi		={};
-			foi.id		= 'SCRP00000000b7e92a99*DC1100';
+			foi.id		= 'SCRP00000000b7e92a99_DC1100';
 			foi.lat		= 51.459162;
 			foi.lon		= 3.902342;
 			foi.observableProperties	= [];
 			var observableProperty		= {};
-			observableProperty.id	= 'raw0';
+			observableProperty.id	= 'scapeler_dylos_raw0';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM2.5';
 			observableProperty.sensorType	= 'Dylos';
 			foi.observableProperties.push(observableProperty);
 			var observableProperty		= {};
-			observableProperty.id	= 'raw1';
+			observableProperty.id	= 'scapeler_dylos_raw1';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM10';
 			observableProperty.sensorType	= 'Dylos';
@@ -509,18 +531,18 @@
 			fois.push(foi);
 
 			var foi		={};
-			foi.id		= 'SCRP00000000ac35e5d3*DC1700';
+			foi.id		= 'SCRP00000000ac35e5d3_DC1700';
 			foi.lat		= 51.459162;
 			foi.lon		= 3.902342;
 			foi.observableProperties	= [];
 			var observableProperty		= {};
-			observableProperty.id	= 'raw0';
+			observableProperty.id	= 'scapeler_dylos_raw0';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM2.5';
 			observableProperty.sensorType	= 'Dylos';
 			foi.observableProperties.push(observableProperty);
 			var observableProperty		= {};
-			observableProperty.id	= 'raw1';
+			observableProperty.id	= 'scapeler_dylos_raw1';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM10';
 			observableProperty.sensorType	= 'Dylos';
@@ -528,18 +550,18 @@
 			fois.push(foi);
 
 			var foi		={};
-			foi.id		= 'SCRP00000000b7e92a99*DC1700';
+			foi.id		= 'SCRP00000000b7e92a99_DC1700';
 			foi.lat		= 51.459162;
 			foi.lon		= 3.902342;
 			foi.observableProperties	= [];
 			var observableProperty		= {};
-			observableProperty.id	= 'raw0';
+			observableProperty.id	= 'scapeler_dylos_raw0';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM2.5';
 			observableProperty.sensorType	= 'Dylos';
 			foi.observableProperties.push(observableProperty);
 			var observableProperty		= {};
-			observableProperty.id	= 'raw1';
+			observableProperty.id	= 'scapeler_dylos_raw1';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM10';
 			observableProperty.sensorType	= 'Dylos';
@@ -547,18 +569,18 @@
 			fois.push(foi);
 
 			var foi		={};
-			foi.id		= 'SCRP00000000ac35e5d3*DC1100';
+			foi.id		= 'SCRP00000000ac35e5d3_DC1100';
 			foi.lat		= 51.459162;
 			foi.lon		= 3.902342;
 			foi.observableProperties	= [];
 			var observableProperty		= {};
-			observableProperty.id	= 'raw0';
+			observableProperty.id	= 'scapeler_dylos_raw0';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM2.5';
 			observableProperty.sensorType	= 'Dylos';
 			foi.observableProperties.push(observableProperty);
 			var observableProperty		= {};
-			observableProperty.id	= 'raw1';
+			observableProperty.id	= 'scapeler_dylos_raw1';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM10';
 			observableProperty.sensorType	= 'Dylos';
@@ -571,13 +593,13 @@
 			foi.lon		= 6.582;
 			foi.observableProperties	= [];
 			var observableProperty		= {};
-			observableProperty.id	= 'raw0';
+			observableProperty.id	= 'scapeler_dylos_raw0';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM2.5';
 			observableProperty.sensorType	= 'Dylos';
 			foi.observableProperties.push(observableProperty);
 			var observableProperty		= {};
-			observableProperty.id	= 'raw1';
+			observableProperty.id	= 'scapeler_dylos_raw1';
 			observableProperty.uom	= 'p/0.01 cb.ft.';
 			observableProperty.externalName	= 'PM10';
 			observableProperty.sensorType	= 'Dylos';
@@ -606,13 +628,16 @@
 			measurement.fields 			= {};
 
 			console.dir(_data);
-			console.dir(_data[0].observableProperty);
-			console.dir(_data[1].observableProperty);
+			console.dir(_data[0].scapeler_dylos_raw0);
+			console.dir(_data[0].scapeler_dylos_raw1);
+
 
 			for (var i=0;i<_data.length;i++) {
 				var observation = _data[i];
+				console.dir(observation)
 				var validData = false;
 				lat = undefined;
+/*
 				for (var f=0; f<fois.length;f++){
 					if (observation.featureOfInterest == fois[f].id) {
 						console.log(observation.observableProperty);
@@ -629,27 +654,38 @@
 						}
 					}
 				}
+*/
+				for (var f=0; f<fois.length;f++){
+					if (observation.sensorId == fois[f].id) {
+						console.log(observation.sensorId);
+						lat				= fois[f].lat;
+						lon				= fois[f].lon;
+						validData	= true;
+						break;
+					}
+				}
 				if (validData==false) continue; // foi is not autorized to use the portal
 
-				id				= observation.featureOfInterest;
-				fromDateTime 	= observation.resultValues[0][0];
-				toDateTime 		= observation.resultValues[0][0];
-	//			sensorValue		=
-				if (uom == undefined) {
-					sensorEenheid 	= observation.resultFields[1].uom;
-				} else {
-					sensorEenheid	= uom;
-				}
+				id				= observation.sensorId;
+				fromDateTime 	= observation.dateObserved;
+				toDateTime 		= observation.dateObserved;
+//	//			sensorValue		=
+//				if (uom == undefined) {
+//					sensorEenheid 	= 'p/0.01 cb.ft.' //observation.resultFields[1].uom;
+//				} else {
+//					sensorEenheid	= uom;
+//				}
+				sensorEenheid 	= 'p/0.01 cb.ft.'
+				externalName	= 'PM10';
+				sensorType	= 'Dylos';
+
 
 				measurement.tags.id 					= id;
 				measurement.fields.lat 					= lat;
 				measurement.fields.lon 					= lon;
 				measurement.fields.timestamp_from 		= fromDateTime;
 				measurement.fields.timestamp_to 		= toDateTime;
-				if (sensorType == 'Dylos') {
-					dylos[externalName] = observation.resultValues[0][1];
-				}
-				measurement.fields[externalName]					= observation.resultValues[0][1];  // value / ug/m3
+//				measurement.fields[externalName]					= observation.resultValues[0][1];  // value / ug/m3
 				//measurement.fields[externalName+"-eenheid"] 		= sensorEenheid; // ??
 				measurement.fields[externalName+"-meetopstelling"]	= sensorType;  // Dylos DC1700
 	/*
@@ -663,12 +699,12 @@
 
 			}  // end of for loop observations in _data
 
-				if (dylos['PM2.5'] != undefined && dylos['PM10'] != undefined) {
-					dylos.pm25UgM3	= (dylos['PM2.5'] - dylos['PM10'] ) / 250;
+				if (observation.scapeler_dylos_raw0 != undefined && observation.scapeler_dylos_raw1 != undefined) {
+					dylos.pm25UgM3	= (observation.scapeler_dylos_raw0 - observation.scapeler_dylos_raw1 ) / 250;
 					dylos.pm10UgM3	= dylos.pm25UgM3 * 1.43;
 					dylos.pm25UgM3	= Math.round(dylos.pm25UgM3*100)/100;
 					dylos.pm10UgM3	= Math.round(dylos.pm10UgM3*100)/100;
-					console.log(dylos['PM2.5'] + '->' + dylos.pm25UgM3 + ' & ' + dylos['PM10'] + '->' + dylos.pm10UgM3 );
+					console.log(observation.scapeler_dylos_raw0 + '->' + dylos.pm25UgM3 + ' & ' + observation.scapeler_dylos_raw1 + '->' + dylos.pm10UgM3 );
 					measurement.fields['PM2.5'] = dylos.pm25UgM3+0.5;
 					measurement.fields['PM10'] = dylos.pm10UgM3+0.5;
 				}
@@ -676,14 +712,16 @@
 				console.dir(measurement);
 				console.dir(influx);
 
-				influx.writePoints([
-					measurement
-				]).catch(err => {
-					console.log(err)
-	//				res.status(500)
-	//				.send(err.stack)
-					return;
-				})
+				if (1==2) {
+					influx.writePoints([
+						measurement
+					]).catch(err => {
+						console.log(err)
+		//				res.status(500)
+		//				.send(err.stack)
+						return;
+					})
+				}
 
 	//				where host = ${Influx.escape.stringLit(os.hostname())}
 	//				order by time desc
