@@ -715,8 +715,8 @@
 					dylos.pm25UgM3	= Math.round(dylos.pm25UgM3*100)/100+0.5;
 					dylos.pm10UgM3	= Math.round(dylos.pm10UgM3*100)/100+0.5;
 					console.log(observation.scapeler_dylos_raw0 + '->' + dylos.pm25UgM3 + ' & ' + observation.scapeler_dylos_raw1 + '->' + dylos.pm10UgM3 );
-					measurement.fields['PM2.5'] = dylos.pm25UgM3.toString();
-					measurement.fields["PM10"] = dylos.pm10UgM3.toString();
+					measurement.fields['PM2.5'] = dylos.pm25UgM3;
+					measurement.fields[externalName] = dylos.pm10UgM3;
 				}
 
 				console.dir(measurement);
