@@ -268,6 +268,13 @@ module.exports = {
 		if (record.pm25==undefined) return null; // no pmvalues SDS011
     if (record.pm10=='nan') return null; // no pmvalues SDS011
     if (record.pm25=='nan') return null; // no pmvalues SDS011
+    var num=parseFloat(record.pm25)
+    if (num==NaN) return null; // no pmvalues SDS011
+    if (num>900) return null; // invalid pmvalues SDS011
+    var num=parseFloat(record.pm10)
+    if (num==NaN) return null; // no pmvalues SDS011
+    if (num>900) return null; // invalid pmvalues SDS011
+
     if (record.pm25>900) return null; // invalid pmvalues SDS011
     if (inMeasurement.location.indoor=='1') return null; // skip indoor sensors
     if (inMeasurement.location.latitude==0) return null; // skip no location
