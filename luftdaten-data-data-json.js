@@ -184,7 +184,7 @@ module.exports = {
 	};
 
   var processArrayOut=function(){
-    console.log('process arraout ' + arrayOutIndex);
+    console.log('process arrayout ' + arrayOutIndex);
     if (arrayOutIndex>=arrayOut.length ) {
       console.log('End of processing arrayOut: ' + arrayOut.length + ' observations.' )
       return
@@ -266,12 +266,19 @@ module.exports = {
 			}
 		}
 		if (record.pm25==undefined) return null; // no pmvalues SDS011
+    if (record.pm10=='nan') return null; // no pmvalues SDS011
+    if (record.pm25=='nan') return null; // no pmvalues SDS011
+    if (record.pm25>900) return null; // invalid pmvalues SDS011
+    if (inMeasurement.location.indoor=='1') return null; // skip indoor sensors
+    if (inMeasurement.location.latitude==0) return null; // skip no location
+    if (inMeasurement.location.longitude==0) return null; // skip no location
 
 		record.measurementTime 	= inMeasurement.timestamp.replace(/ /,'T')+'.000Z';
 		record.countryCode 			= inMeasurement.location.country;
 		record.latitude 				= inMeasurement.location.latitude;
 		record.longitude 				= inMeasurement.location.longitude;
 		record.altitude 				= inMeasurement.location.altitude;
+    record.indoor    				= inMeasurement.location.indoor;
 		record.sensorId					= inMeasurement.sensor.id;
 		record.foi 							= 'LUFTDATEN'+inMeasurement.location.country+inMeasurement.sensor.id;
 
@@ -283,6 +290,7 @@ module.exports = {
       '' 	+ record.latitude + ';' +
       '' 	+ record.longitude + ';' +
       '' 	+ record.altitude + ';' +
+      '' 	+ record.indoor + ';' +
 			'' 	+ record.pm25 + ';' +
 			'' 	+ record.pm10 ;
 		return recordOut;
@@ -346,7 +354,7 @@ module.exports = {
 
 			console.log('Number of records retrieved: '+inRecord.length);
 			var csvRecord = '';
-      csvFileOut = 'datetime;country;sensorId;foi;lat;lon;alt;pm25;pm10\n'; // csv header
+      csvFileOut = 'datetime;country;sensorId;foi;lat;lon;alt;indoor;pm25;pm10\n'; // csv header
 
 			for (var i=0;i<inRecord.length;i++) {
 
