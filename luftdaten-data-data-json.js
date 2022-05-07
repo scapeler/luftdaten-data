@@ -162,7 +162,7 @@ module.exports = {
 		//'&neighborhoodcode=' + data.neighborhoodCode + '&citycode=' + data.cityCode +
 		  '&foi=' + data.foi +
 			'&observation=' + data.observation +
-			'&measurementTime' + data.measurementTime ;
+			'&measurementTime=' + data.measurementTime ;
 
 		console.log(_url);
 
